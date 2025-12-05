@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Финансовый калькулятор (6 знаков после запятой)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+        .calculator-container {
+            width: 700px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+            background-color: #ffffff;
+        }
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            color: #1a73e8;
+        }
+        .student-info {
+            font-size: 0.9em;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+            margin-bottom: 25px;
+        }
+        .calculation-grid {
+            display: grid;
+            grid-template-columns: 1fr 50px 1fr 50px 1fr 50px 1fr;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .input-group input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.1em;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .operator-group {
+            text-align: center;
+            font-weight: bold;
+        }
+        .operator-group select {
+            padding: 8px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+        .priority-group {
+            background-color: #e6f7ff; 
+            border: 2px solid #91d5ff;
+            padding: 5px;
+            border-radius: 5px;
+            grid-column: 3 / span 3;
+            display: contents; 
+        }
+        .final-rounding {
+            margin-top: 25px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f4f6f9;
+        }
+        .final-rounding label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .final-rounding input {
+            margin-right: 5px;
+        }
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #fff;
+            background-color: #34a853;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .result-box {
+            margin-top: 25px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            text-align: center;
+            background-color: #f8f9fa;
+        }
+        #result-final {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #202124;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        #result-rounded {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #d93025; 
+            margin-top: 10px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .error-msg {
+            color: #d93025;
+            background-color: #fce8e6;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 500;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator-container">
+        <h2>Финансовый калькулятор (6 знаков)</h2>
+
+        <div class="student-info">
+            Витушко Павел Олегович<br>
+            Курс 4, Группа 4<br>
+            2025 год
+        </div>
+        
+        <div class="calculation-grid">
+            <div class="input-group"><input type="text" id="num1" value="0"></div>
+            <div class="operator-group"><select id="op_a"><option value="add">+</option><option value="subtract">-</option><option value="multiply">*</option><option value="divide">/</option></select></div>
+            
+            <div class="input-group priority-group"><input type="text" id="num2" value="0"></div>
+            <div class="operator-group priority-group"><select id="op_b"><option value="add">+</option><option value="subtract">-</option><option value="multiply">*</option><option value="divide">/</option></select></div>
+            <div class="input-group priority-group"><input type="text" id="num3" value="0"></div>
+            
+            <div class="operator-group"><select id="op_c"><option value="add">+</option><option value="subtract">-</option><option value="multiply">*</option><option value="divide">/</option></select></div>
+            <div class="input-group"><input type="text" id="num4" value="0"></div>
+        </div>
+        
+        <div class="final-rounding">
+            <label>Округление итогового результата до **целых чисел**:</label>
+            <div>
+                <input type="radio" name="final_round" value="math" id="round_math" checked>
+                <label for="round_math">Математическое (Round half up)</label>
+            </div>
+            <div>
+                <input type="radio" name="final_round" value="bankers" id="round_bankers">
+                <label for="round_bankers">Бухгалтерское (банковское) (Round half to even)</label>
+            </div>
+            <div>
+                <input type="radio" name="final_round" value="truncate" id="round_truncate">
+                <label for="round_truncate">Усечение (удаление дробной части)</label>
+            </div>
+        </div>
+
+        <button id="calculate-btn" class="calculate-btn">Вычислить</button>
+
+        <div class="result-box">
+            <label>Финальный результат (6 знаков):</label>
+            <div id="result-final">0.000000</div>
+            
+            <label>Округлено до целого:</label>
+            <div id="result-rounded">0</div>
+            
+            <div id="error-display" class="error-msg"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // === КОНСТАНТЫ (ОБНОВЛЕНО ДО 6 ЗНАКОВ) ===
+            const DECIMALS = 6;
+            const PRECISION = 1_000_000n; // 10^6
+            const HALF_PRECISION = 500_000n; // 0.5 * 10^6
+            const MAX_INTEGER_PART = 1_000_000_000_000n; // 10^12
+            const MAX_VALUE = MAX_INTEGER_PART * PRECISION; // 10^18
+            const MIN_VALUE = -MAX_VALUE;
+
+            // === Получение элементов DOM ===
+            const inputs = [
+                document.getElementById('num1'), document.getElementById('num2'),
+                document.getElementById('num3'), document.getElementById('num4')
+            ];
+            const ops = [
+                document.getElementById('op_a'), document.getElementById('op_b'),
+                document.getElementById('op_c')
+            ];
+            const resultFinalOutput = document.getElementById('result-final');
+            const resultRoundedOutput = document.getElementById('result-rounded');
+            const errorDisplay = document.getElementById('error-display');
+            const calcButton = document.getElementById('calculate-btn');
+
+            // === Функции отображения ошибок ===
+            function showError(msg) {
+                errorDisplay.textContent = msg;
+                errorDisplay.style.display = 'block';
+                resultFinalOutput.style.color = '#ccc';
+                resultRoundedOutput.textContent = '';
+            }
+
+            function clearError() {
+                errorDisplay.style.display = 'none';
+                resultFinalOutput.style.color = '#202124';
+            }
+
+            // === ВАЛИДАЦИЯ И ПАРСИНГ ===
+
+            function parseAndValidate(strRaw, fieldName) {
+                let str = strRaw.trim();
+                if (str === "") throw new Error(`Поле "${fieldName}" пустое.`);
+                if (/[^0-9.,\-\s]/.test(str)) throw new Error(`В поле "${fieldName}" введены недопустимые символы.`);
+
+                let checkStr = str.replace(',', '.');
+                let cleanStr = checkStr;
+
+                if (checkStr.includes(' ')) {
+                    const strictSpaceRegex = /^-?(0|[1-9]\d{0,2}(\s\d{3})*)(\.\d+)?$/;
+                    if (!strictSpaceRegex.test(checkStr)) throw new Error(`Некорректная расстановка пробелов в поле "${fieldName}".`);
+                    cleanStr = checkStr.replace(/\s/g, '');
+                } else {
+                    const noSpaceRegex = /^-?(0|[1-9]\d*)(\.\d+)?$/;
+                    if (!noSpaceRegex.test(checkStr)) throw new Error(`Некорректный формат числа в поле "${fieldName}".`);
+                }
+
+                const parts = cleanStr.split('.');
+                const integerPart = parts[0].replace('-', '');
+                if (integerPart.length > 12) {
+                    throw new Error(`Введенное число ${fieldName} превышает лимит целой части (12 цифр).`);
+                }
+
+                return parseToBigInt(cleanStr);
+            }
+            
+            function parseToBigInt(cleanStr) {
+                const parts = cleanStr.split('.');
+                let integerPart = BigInt(parts[0]);
+                let decimalStr = parts[1] || "";
+
+                // Обновлено: Паддинг до 6 знаков
+                decimalStr = decimalStr.padEnd(DECIMALS, '0').substring(0, DECIMALS);
+                const decimalBigInt = BigInt(decimalStr);
+                
+                if (integerPart < 0n || (integerPart === 0n && cleanStr.startsWith('-'))) {
+                     return (integerPart * PRECISION) - decimalBigInt;
+                } else {
+                    return (integerPart * PRECISION) + decimalBigInt;
+                }
+            }
+            
+            // === ФУНКЦИЯ ПРОМЕЖУТОЧНЫХ ВЫЧИСЛЕНИЙ С ОКРУГЛЕНИЕМ ДО 6 ЗНАКОВ ===
+
+            function performOperation(val1, val2, operation) {
+                let result;
+                
+                switch (operation) {
+                    case 'add':
+                        result = val1 + val2;
+                        break;
+                    case 'subtract':
+                        result = val1 - val2;
+                        break;
+                    case 'multiply':
+                        // Умножение с округлением до 6 знаков
+                        const product = val1 * val2;
+                        if (product >= 0n) {
+                            result = (product + HALF_PRECISION) / PRECISION;
+                        } else {
+                            result = (product - HALF_PRECISION) / PRECISION;
+                        }
+                        break;
+                    case 'divide':
+                        if (val2 === 0n) throw new Error("Деление на ноль невозможно.");
+                        // Деление с округлением до 6 знаков (нужен буфер *10)
+                        const buffer = (val1 * PRECISION * 10n) / val2;
+                        const roundingCorrection = (buffer >= 0n) ? 5n : -5n;
+                        result = (buffer + roundingCorrection) / 10n;
+                        break;
+                    default:
+                        throw new Error("Неизвестная операция.");
+                }
+
+                // Проверка на переполнение после операции
+                if (result > MAX_VALUE || result < MIN_VALUE) {
+                    throw new Error("Переполнение диапазона в промежуточном вычислении. Лимит: +/- 1 000 000 000 000");
+                }
+
+                return result;
+            }
+
+            // === ФУНКЦИИ ФИНАЛЬНОГО ОКРУГЛЕНИЯ ДО ЦЕЛЫХ ===
+            
+            // 1. Математическое округление
+            function roundMath(bigIntScaled) {
+                const halfway = HALF_PRECISION;
+                
+                if (bigIntScaled >= 0n) {
+                    return (bigIntScaled + halfway) / PRECISION;
+                } else {
+                    return (bigIntScaled - halfway) / PRECISION;
+                }
+            }
+
+            // 2. Бухгалтерское (банковское) округление
+            function roundBankers(bigIntScaled) {
+                const integerPart = bigIntScaled / PRECISION;
+                const fractionalPart = bigIntScaled % PRECISION;
+                const absFractional = fractionalPart < 0n ? -fractionalPart : fractionalPart; 
+                const sign = bigIntScaled >= 0n ? 1n : -1n;
+
+                if (absFractional < HALF_PRECISION) {
+                    return integerPart;
+                }
+                if (absFractional > HALF_PRECISION) {
+                    return integerPart + sign;
+                }
+                
+                // Случай "ровно половина"
+                if (integerPart % 2n === 0n) {
+                    return integerPart;
+                } else {
+                    return integerPart + sign;
+                }
+            }
+
+            // 3. Усечение (Truncate)
+            function roundTruncate(bigIntScaled) {
+                return bigIntScaled / PRECISION;
+            }
+            
+            // === ФОРМАТИРОВАНИЕ ВЫВОДА (Обновлено для 6 знаков) ===
+
+            function formatResult(bigIntNum) {
+                const isNegative = bigIntNum < 0n;
+                const absVal = isNegative ? -bigIntNum : bigIntNum;
+
+                const integerPartVal = absVal / PRECISION;
+                const decimalPartVal = absVal % PRECISION;
+
+                // Форматирование целой части с пробелами
+                let intStr = integerPartVal.toString();
+                intStr = intStr.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
+                // Форматирование дробной части
+                let decStr = decimalPartVal.toString().padStart(DECIMALS, '0');
+                decStr = decStr.replace(/0+$/, ''); // Убираем незначащие нули
+
+                let result = (isNegative ? "-" : "") + intStr;
+
+                if (decStr.length > 0) {
+                    result += "." + decStr;
+                } else {
+                    // Если число целое, выводим 6 нулей
+                    result += "." + '0'.repeat(DECIMALS);
+                }
+
+                return result;
+            }
+
+            // === ОСНОВНОЙ АЛГОРИТМ ВЫЧИСЛЕНИЙ ===
+
+            calcButton.addEventListener('click', () => {
+                clearError();
+                try {
+                    // 1. Парсинг всех операндов
+                    const v1 = parseAndValidate(inputs[0].value, "Num 1");
+                    const v2 = parseAndValidate(inputs[1].value, "Num 2");
+                    const v3 = parseAndValidate(inputs[2].value, "Num 3");
+                    const v4 = parseAndValidate(inputs[3].value, "Num 4");
+                    
+                    const opA = ops[0].value;
+                    const opB = ops[1].value;
+                    const opC = ops[2].value;
+
+                    let intermediateResult;
+
+                    // A. Приоритетный блок (в скобках): (Num2 opB Num3)
+                    intermediateResult = performOperation(v2, v3, opB);
+
+                    // B. Левая часть: Num1 opA [Результат A]
+                    intermediateResult = performOperation(v1, intermediateResult, opA);
+
+                    // C. Финальный результат: [Результат B] opC Num4
+                    const finalResultScaled = performOperation(intermediateResult, v4, opC);
+                    
+                    // 2. Отображение основного результата
+                    resultFinalOutput.textContent = formatResult(finalResultScaled);
+
+                    // 3. Финальное округление до целого
+                    const roundMethod = document.querySelector('input[name="final_round"]:checked').value;
+                    let finalRoundedInt;
+
+                    switch (roundMethod) {
+                        case 'math':
+                            finalRoundedInt = roundMath(finalResultScaled);
+                            break;
+                        case 'bankers':
+                            finalRoundedInt = roundBankers(finalResultScaled);
+                            break;
+                        case 'truncate':
+                            finalRoundedInt = roundTruncate(finalResultScaled);
+                            break;
+                    }
+
+                    // 4. Отображение округленного результата
+                    let finalRoundedStr = finalRoundedInt.toString();
+                    finalRoundedStr = finalRoundedStr.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
+                    resultRoundedOutput.textContent = finalRoundedStr;
+
+                } catch (e) {
+                    showError(e.message);
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
