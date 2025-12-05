@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Финансовый калькулятор (Округление при умножении)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 90vh;
+            background-color: #eef2f5;
+            color: #333;
+        }
+        .calculator-container {
+            width: 600px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            background-color: #ffffff;
+        }
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            color: #1a73e8;
+            font-weight: 600;
+        }
+        .student-info {
+            font-size: 0.9em;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+        .input-group input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.2em;
+            box-sizing: border-box;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+        .input-group input[type="text"]:focus {
+            border-color: #1a73e8;
+            outline: none;
+        }
+        .operations {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 25px 0;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #eee;
+        }
+        .operations label {
+            font-size: 1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+        .operations input {
+            margin-right: 10px;
+            accent-color: #1a73e8;
+            transform: scale(1.2);
+        }
+        .calculate-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #fff;
+            background-color: #34a853;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 6px rgba(52, 168, 83, 0.2);
+        }
+        .calculate-btn:hover {
+            background-color: #2c8c45;
+        }
+        .calculate-btn:active {
+            transform: scale(0.98);
+        }
+        .result-box {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .result-box label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+        }
+        #result {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #202124;
+            word-wrap: break-word;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .error-msg {
+            color: #d93025;
+            background-color: #fce8e6;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 500;
+            margin-top: 15px;
+            display: none;
+            border: 1px solid #fad2cf;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator-container">
+        <h2>Финансовый калькулятор</h2>
+
+        <div class="student-info">
+            Витушко Павел Олегович<br>
+            Курс 4, Группа 4<br>
+            2025 год
+        </div>
+
+        <div class="input-group">
+            <label for="num1">Число 1:</label>
+            <input type="text" id="num1" placeholder="Например: 1 000 или 1000">
+        </div>
+
+        <div class="input-group">
+            <label for="num2">Число 2:</label>
+            <input type="text" id="num2" placeholder="Например: 50.5">
+        </div>
+
+        <div class="operations">
+            <label><input type="radio" name="operation" value="add" checked> Сложение (+)</label>
+            <label><input type="radio" name="operation" value="subtract"> Вычитание (-)</label>
+            <label><input type="radio" name="operation" value="multiply"> Умножение (*)</label>
+            <label><input type="radio" name="operation" value="divide"> Деление (/)</label>
+        </div>
+
+        <button id="calculate-btn" class="calculate-btn">Вычислить</button>
+
+        <div class="result-box">
+            <label for="result">Результат:</label>
+            <div id="result">0</div>
+            <div id="error-display" class="error-msg"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // === КОНСТАНТЫ ===
+            const PRECISION = 1_000_000n; // 6 знаков точности
+            const HALF_PRECISION = 500_000n; // Для округления (PRECISION / 2)
+            const MAX_VALUE = 1_000_000_000_000_000_000n; 
+            const MIN_VALUE = -MAX_VALUE;
+
+            const num1Input = document.getElementById('num1');
+            const num2Input = document.getElementById('num2');
+            const resultOutput = document.getElementById('result');
+            const errorDisplay = document.getElementById('error-display');
+
+            function showError(msg) {
+                errorDisplay.textContent = msg;
+                errorDisplay.style.display = 'block';
+                resultOutput.style.color = '#ccc';
+            }
+
+            function clearError() {
+                errorDisplay.style.display = 'none';
+                resultOutput.style.color = '#202124';
+            }
+
+            function calculate() {
+                clearError();
+                try {
+                    const str1 = num1Input.value;
+                    const str2 = num2Input.value;
+
+                    // Валидация и Парсинг
+                    const val1 = parseAndValidate(str1, "Число 1");
+                    const val2 = parseAndValidate(str2, "Число 2");
+
+                    const operation = document.querySelector('input[name="operation"]:checked').value;
+                    let result = 0n;
+
+                    switch (operation) {
+                        case 'add':
+                            result = val1 + val2;
+                            break;
+                        case 'subtract':
+                            result = val1 - val2;
+                            break;
+                        case 'multiply':
+                            // === ИЗМЕНЕНИЕ: Округление при умножении ===
+                            // Формула: (val1 * val2) / PRECISION дает усечение.
+                            // Нам нужно округление.
+                            // Алгоритм: (val1 * val2 + HALF) / PRECISION
+                            
+                            const product = val1 * val2;
+                            
+                            if (product >= 0n) {
+                                result = (product + HALF_PRECISION) / PRECISION;
+                            } else {
+                                // Для отрицательных чисел вычитаем половину ("округляем влево" по числовой оси, т.е. увеличиваем модуль)
+                                result = (product - HALF_PRECISION) / PRECISION;
+                            }
+                            break;
+                        case 'divide':
+                            if (val2 === 0n) throw new Error("Деление на ноль невозможно.");
+                            // Деление также требует округления
+                            const buffer = (val1 * PRECISION * 10n) / val2;
+                            const roundingCorrection = (buffer >= 0n) ? 5n : -5n;
+                            result = (buffer + roundingCorrection) / 10n;
+                            break;
+                    }
+
+                    if (result > MAX_VALUE || result < MIN_VALUE) {
+                        throw new Error("Переполнение! Результат превышает +/- 1 000 000 000 000.");
+                    }
+
+                    resultOutput.textContent = formatResult(result);
+
+                } catch (e) {
+                    showError(e.message);
+                }
+            }
+
+            // === Валидация и Парсинг (как в предыдущем шаге) ===
+            function parseAndValidate(strRaw, fieldName) {
+                let str = strRaw.trim();
+                if (str === "") throw new Error(`Поле "${fieldName}" пустое.`);
+
+                if (/[^0-9.,\-\s]/.test(str)) {
+                    throw new Error(`В поле "${fieldName}" введены недопустимые символы.`);
+                }
+
+                let checkStr = str.replace(',', '.');
+
+                if (checkStr.includes(' ')) {
+                    // Строгий режим (с пробелами)
+                    const strictSpaceRegex = /^-?(0|[1-9]\d{0,2}(\s\d{3})*)(\.\d+)?$/;
+                    if (!strictSpaceRegex.test(checkStr)) {
+                        if (/\s\s/.test(checkStr)) throw new Error(`В поле "${fieldName}" два пробела подряд.`);
+                        throw new Error(`Некорректная расстановка пробелов в поле "${fieldName}".`);
+                    }
+                } else {
+                    // Обычный режим (без пробелов)
+                    const noSpaceRegex = /^-?(0|[1-9]\d*)(\.\d+)?$/;
+                    if (!noSpaceRegex.test(checkStr)) {
+                        if (checkStr.lastIndexOf('-') > 0) throw new Error(`В поле "${fieldName}" знак минуса не на месте.`);
+                        throw new Error(`Некорректный формат числа в поле "${fieldName}".`);
+                    }
+                }
+
+                return parseToBigInt(checkStr.replace(/\s/g, ''));
+            }
+
+            function parseToBigInt(cleanStr) {
+                const parts = cleanStr.split('.');
+                let integerPart = BigInt(parts[0]);
+                let decimalStr = parts[1] || "";
+
+                decimalStr = decimalStr.padEnd(6, '0').substring(0, 6);
+                const decimalBigInt = BigInt(decimalStr);
+                
+                if (integerPart < 0n || (integerPart === 0n && cleanStr.startsWith('-'))) {
+                     return (integerPart * PRECISION) - decimalBigInt;
+                } else {
+                    return (integerPart * PRECISION) + decimalBigInt;
+                }
+            }
+
+            function formatResult(bigIntNum) {
+                const isNegative = bigIntNum < 0n;
+                const absVal = isNegative ? -bigIntNum : bigIntNum;
+
+                const integerPartVal = absVal / PRECISION;
+                const decimalPartVal = absVal % PRECISION;
+
+                let intStr = integerPartVal.toString();
+                intStr = intStr.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
+                let decStr = decimalPartVal.toString().padStart(6, '0');
+                decStr = decStr.replace(/0+$/, '');
+
+                let result = (isNegative ? "-" : "") + intStr;
+
+                if (decStr.length > 0) {
+                    result += "." + decStr;
+                } 
+
+                return result;
+            }
+
+            document.getElementById('calculate-btn').addEventListener('click', calculate);
+        });
+    </script>
+
+</body>
+</html>
