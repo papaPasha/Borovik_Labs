@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Финансовый калькулятор (10 знаков)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+        .calculator-container {
+            width: 850px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+            background-color: #ffffff;
+        }
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            color: #1a73e8;
+            margin-bottom: 10px;
+        }
+        .student-info {
+            font-size: 0.9em;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+            margin-bottom: 20px;
+        }
+        .calculation-layout {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #fafafa;
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+        .input-block, .operator-block, .parenthesis-block {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .input-block input {
+            width: 170px;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: right;
+        }
+        .operator-block select {
+            padding: 8px 12px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: white;
+            font-weight: bold;
+        }
+        .parenthesis-block {
+            background-color: #e6f7ff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 2px solid #91d5ff;
+        }
+        .parenthesis {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #1890ff;
+            margin: 0 5px;
+        }
+        .final-rounding {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f4f6f9;
+        }
+        .final-rounding label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .final-rounding div {
+            margin: 5px 0;
+        }
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #fff;
+            background-color: #34a853;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        .calculate-btn:hover {
+            background-color: #2d8c47;
+        }
+        .results {
+            margin-top: 25px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+        }
+        .result-item {
+            margin: 15px 0;
+        }
+        .result-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .result-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #202124;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            word-break: break-all;
+        }
+        .rounded-value {
+            color: #d93025;
+            font-size: 1.6em;
+        }
+        .error-msg {
+            color: #d93025;
+            background-color: #fce8e6;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            margin-top: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="calculator-container">
+    <h2>Финансовый калькулятор (10 знаков)</h2>
+    
+    <div class="student-info">
+        Витушко Павел Олегович<br>
+        Курс 4, Группа 4<br>
+        2025 год
+    </div>
+    
+    <div class="calculation-layout">
+        <div class="input-block">
+            <input type="text" id="num1" value="0" placeholder="Введите число...">
+        </div>
+        
+        <div class="operator-block">
+            <select id="op_a">
+                <option value="add">+</option>
+                <option value="subtract">-</option>
+                <option value="multiply">*</option>
+                <option value="divide">/</option>
+            </select>
+        </div>
+        
+        <div class="parenthesis-block">
+            <span class="parenthesis">(</span>
+            <div class="input-block">
+                <input type="text" id="num2" value="0" placeholder="Введите число...">
+            </div>
+            
+            <div class="operator-block">
+                <select id="op_b">
+                    <option value="add">+</option>
+                    <option value="subtract">-</option>
+                    <option value="multiply">*</option>
+                    <option value="divide">/</option>
+                </select>
+            </div>
+            
+            <div class="input-block">
+                <input type="text" id="num3" value="0" placeholder="Введите число...">
+            </div>
+            <span class="parenthesis">)</span>
+        </div>
+        
+        <div class="operator-block">
+            <select id="op_c">
+                <option value="add">+</option>
+                <option value="subtract">-</option>
+                <option value="multiply">*</option>
+                <option value="divide">/</option>
+            </select>
+        </div>
+        
+        <div class="input-block">
+            <input type="text" id="num4" value="0" placeholder="Введите число...">
+        </div>
+        
+        <div style="font-size: 1.5em; margin: 0 10px; font-weight: bold;">=</div>
+    </div>
+    
+    <div class="final-rounding">
+        <label>Округление итогового результата до целых чисел:</label>
+        <div>
+            <input type="radio" name="final_round" value="math" id="round_math" checked>
+            <label for="round_math">Математическое (Round half up)</label>
+        </div>
+        <div>
+            <input type="radio" name="final_round" value="bankers" id="round_bankers">
+            <label for="round_bankers">Бухгалтерское (банковское) (Round half to even)</label>
+        </div>
+        <div>
+            <input type="radio" name="final_round" value="truncate" id="round_truncate">
+            <label for="round_truncate">Усечение (удаление дробной части)</label>
+        </div>
+    </div>
+    
+    <button id="calculate-btn" class="calculate-btn">Вычислить</button>
+    
+    <div class="results">
+        <div class="result-item">
+            <div class="result-label">Финальный результат (10 знаков):</div>
+            <div id="result-final" class="result-value">0.0000000000</div>
+        </div>
+        
+        <div class="result-item">
+            <div class="result-label">Округлено до целого:</div>
+            <div id="result-rounded" class="result-value rounded-value">0</div>
+        </div>
+        
+        <div id="error-display" class="error-msg"></div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const DECIMALS = 10;
+    const PRECISION = 10n ** BigInt(DECIMALS);
+    const HALF_PRECISION = 5n * (10n ** BigInt(DECIMALS - 1));
+    const MAX_INTEGER_PART = 10_000_000_000_000n;
+    const MAX_DIGITS = 13;
+    const MAX_VALUE = MAX_INTEGER_PART * PRECISION;
+    const MIN_VALUE = -MAX_VALUE;
+
+    const inputs = [
+        document.getElementById('num1'),
+        document.getElementById('num2'),
+        document.getElementById('num3'),
+        document.getElementById('num4')
+    ];
+    const ops = [
+        document.getElementById('op_a'),
+        document.getElementById('op_b'),
+        document.getElementById('op_c')
+    ];
+    const resultFinalOutput = document.getElementById('result-final');
+    const resultRoundedOutput = document.getElementById('result-rounded');
+    const errorDisplay = document.getElementById('error-display');
+    const calcButton = document.getElementById('calculate-btn');
+
+    function showError(msg) {
+        errorDisplay.textContent = msg;
+        errorDisplay.style.display = 'block';
+        resultFinalOutput.style.color = '#ccc';
+        resultRoundedOutput.textContent = '';
+    }
+
+    function clearError() {
+        errorDisplay.style.display = 'none';
+        resultFinalOutput.style.color = '#202124';
+    }
+
+    function parseAndValidate(strRaw, fieldName) {
+        let str = strRaw.trim();
+        if (str === "") {
+            return 0n;
+        }
+        
+        let testStr = str.replace(/\s/g, '');
+        testStr = testStr.replace(',', '.');
+        
+        if (!/^-?\d*\.?\d*$/.test(testStr)) {
+            throw new Error(`В поле "${fieldName}" введены недопустимые символы.`);
+        }
+        
+        if (testStr === '' || testStr === '-' || testStr === '.') {
+            return 0n;
+        }
+        
+        if ((testStr.match(/\./g) || []).length > 1) {
+            throw new Error(`В поле "${fieldName}" некорректное число.`);
+        }
+        
+        let normalized = testStr;
+        const parts = normalized.split('.');
+        let integerPart = parts[0];
+        let decimalPart = parts[1] || "";
+        
+        if (integerPart === '' || integerPart === '-') {
+            integerPart = '0';
+        }
+        
+        if (!/^-?\d+$/.test(integerPart)) {
+            throw new Error(`В поле "${fieldName}" некорректная целая часть.`);
+        }
+        
+        const integerDigits = integerPart.replace('-', '').length;
+        if (integerDigits > MAX_DIGITS) {
+            throw new Error(`Целая часть числа содержит ${integerDigits} цифр. Максимум: ${MAX_DIGITS} цифр.`);
+        }
+        
+        const integerBigInt = BigInt(integerPart.replace('-', ''));
+        if (integerBigInt >= MAX_INTEGER_PART) {
+            throw new Error(`Число превышает максимальное значение.`);
+        }
+        
+        decimalPart = decimalPart.substring(0, DECIMALS);
+        decimalPart = decimalPart.padEnd(DECIMALS, '0');
+        const decimalBigInt = BigInt(decimalPart);
+        
+        if (integerPart.startsWith('-')) {
+            const absInteger = integerPart.substring(1);
+            const integerScaled = BigInt(absInteger) * PRECISION;
+            return -(integerScaled + decimalBigInt);
+        } else {
+            const integerScaled = BigInt(integerPart) * PRECISION;
+            return integerScaled + decimalBigInt;
+        }
+    }
+
+    function formatBigInt(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    }
+
+    function performOperation(val1, val2, operation) {
+        let result;
+        
+        switch(operation) {
+            case 'add':
+                result = val1 + val2;
+                break;
+            case 'subtract':
+                result = val1 - val2;
+                break;
+            case 'multiply':
+                const product = val1 * val2;
+                const halfPrecision = (product >= 0n) ? HALF_PRECISION : -HALF_PRECISION;
+                result = (product + halfPrecision) / PRECISION;
+                break;
+            case 'divide':
+                if (val2 === 0n) throw new Error("Деление на ноль невозможно.");
+                const scaledNumerator = val1 * PRECISION;
+                const halfDivPrecision = (scaledNumerator >= 0n) ? HALF_PRECISION : -HALF_PRECISION;
+                result = (scaledNumerator + halfDivPrecision) / val2;
+                break;
+            default:
+                throw new Error("Неизвестная операция.");
+        }
+        
+        if (result > MAX_VALUE || result < MIN_VALUE) {
+            throw new Error(`Переполнение диапазона.`);
+        }
+        
+        return result;
+    }
+
+    function roundMath(scaledValue) {
+        const isNegative = scaledValue < 0n;
+        const absValue = isNegative ? -scaledValue : scaledValue;
+        
+        const remainder = absValue % PRECISION;
+        let result = absValue / PRECISION;
+        
+        if (remainder >= HALF_PRECISION) {
+            result += 1n;
+        }
+        
+        return isNegative ? -result : result;
+    }
+
+    function roundBankers(scaledValue) {
+        const isNegative = scaledValue < 0n;
+        const absValue = isNegative ? -scaledValue : scaledValue;
+        
+        const integerPart = absValue / PRECISION;
+        const fractionalPart = absValue % PRECISION;
+        
+        if (fractionalPart < HALF_PRECISION) {
+            return isNegative ? -integerPart : integerPart;
+        } else if (fractionalPart > HALF_PRECISION) {
+            return isNegative ? -(integerPart + 1n) : (integerPart + 1n);
+        } else {
+            if (integerPart % 2n === 0n) {
+                return isNegative ? -integerPart : integerPart;
+            } else {
+                return isNegative ? -(integerPart + 1n) : (integerPart + 1n);
+            }
+        }
+    }
+
+    function roundTruncate(scaledValue) {
+        const isNegative = scaledValue < 0n;
+        const absValue = isNegative ? -scaledValue : scaledValue;
+        const result = absValue / PRECISION;
+        return isNegative ? -result : result;
+    }
+
+    function formatResult(scaledValue) {
+        const isNegative = scaledValue < 0n;
+        const absValue = isNegative ? -scaledValue : scaledValue;
+        
+        const integerPart = absValue / PRECISION;
+        const fractionalPart = absValue % PRECISION;
+        
+        let intStr = integerPart.toString();
+        intStr = intStr.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        
+        let fracStr = fractionalPart.toString().padStart(DECIMALS, '0');
+        fracStr = fracStr.replace(/0+$/, '');
+        if (fracStr === '') fracStr = '0';
+        
+        let result = (isNegative ? "-" : "") + intStr + "." + fracStr.padEnd(10, '0').substring(0, 10);
+        return result;
+    }
+
+    function evaluateWithPriority(values, operations) {
+        let mulDivValues = [values[0]];
+        let mulDivOps = [];
+        
+        for (let i = 0; i < operations.length; i++) {
+            if (operations[i] === 'multiply' || operations[i] === 'divide') {
+                const result = performOperation(
+                    mulDivValues[mulDivValues.length - 1], 
+                    values[i + 1], 
+                    operations[i]
+                );
+                mulDivValues[mulDivValues.length - 1] = result;
+            } else {
+                mulDivValues.push(values[i + 1]);
+                mulDivOps.push(operations[i]);
+            }
+        }
+        
+        let finalResult = mulDivValues[0];
+        for (let i = 0; i < mulDivOps.length; i++) {
+            finalResult = performOperation(finalResult, mulDivValues[i + 1], mulDivOps[i]);
+        }
+        
+        return finalResult;
+    }
+
+    calcButton.addEventListener('click', () => {
+        clearError();
+        
+        try {
+            const v1 = parseAndValidate(inputs[0].value, "Num1");
+            const v2 = parseAndValidate(inputs[1].value, "Num2");
+            const v3 = parseAndValidate(inputs[2].value, "Num3");
+            const v4 = parseAndValidate(inputs[3].value, "Num4");
+            
+            const opA = ops[0].value;
+            const opB = ops[1].value;
+            const opC = ops[2].value;
+            
+            let priorityResult = performOperation(v2, v3, opB);
+            
+            const values = [v1, priorityResult, v4];
+            const operations = [opA, opC];
+            
+            let finalResult = evaluateWithPriority(values, operations);
+            
+            resultFinalOutput.textContent = formatResult(finalResult);
+            
+            const roundMethod = document.querySelector('input[name="final_round"]:checked').value;
+            let roundedInt;
+            
+            switch(roundMethod) {
+                case 'math':
+                    roundedInt = roundMath(finalResult);
+                    break;
+                case 'bankers':
+                    roundedInt = roundBankers(finalResult);
+                    break;
+                case 'truncate':
+                    roundedInt = roundTruncate(finalResult);
+                    break;
+            }
+            
+            let roundedStr = roundedInt.toString();
+            if (roundedInt < 0n) {
+                roundedStr = roundedStr.substring(1);
+                roundedStr = "-" + roundedStr.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            } else {
+                roundedStr = roundedStr.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            }
+            
+            resultRoundedOutput.textContent = roundedStr;
+            
+        } catch (error) {
+            showError("Ошибка: " + error.message);
+        }
+    });
+
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            let value = this.value;
+            let cursorPos = this.selectionStart;
+            
+            let cleanValue = value;
+            
+            if (cleanValue.includes('.') || cleanValue.includes(',')) {
+                let separatorIndex = Math.max(
+                    cleanValue.lastIndexOf('.'),
+                    cleanValue.lastIndexOf(',')
+                );
+                
+                let integerPart = cleanValue.substring(0, separatorIndex);
+                let decimalPart = cleanValue.substring(separatorIndex);
+                
+                if (integerPart) {
+                    let cleanInteger = integerPart.replace(/[^\d\-]/g, '');
+                    
+                    if (cleanInteger) {
+                        let sign = '';
+                        if (cleanInteger.startsWith('-')) {
+                            sign = '-';
+                            cleanInteger = cleanInteger.substring(1);
+                        }
+                        
+                        cleanInteger = cleanInteger.replace(/^0+/g, '');
+                        if (cleanInteger === '') cleanInteger = '0';
+                        
+                        cleanInteger = cleanInteger.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                        integerPart = sign + cleanInteger;
+                    }
+                }
+                
+                this.value = integerPart + decimalPart;
+            } else {
+                let cleanInteger = cleanValue.replace(/[^\d\-]/g, '');
+                
+                if (cleanInteger) {
+                    let sign = '';
+                    if (cleanInteger.startsWith('-')) {
+                        sign = '-';
+                        cleanInteger = cleanInteger.substring(1);
+                    }
+                    
+                    cleanInteger = cleanInteger.replace(/^0+/g, '');
+                    if (cleanInteger === '') cleanInteger = '0';
+                    
+                    cleanInteger = cleanInteger.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                    this.value = sign + cleanInteger;
+                }
+            }
+            
+            setTimeout(() => {
+                let newCursorPos = Math.min(cursorPos, this.value.length);
+                this.setSelectionRange(newCursorPos, newCursorPos);
+            }, 0);
+            
+            setTimeout(() => calcButton.click(), 500);
+        });
+        
+        input.addEventListener('paste', function(e) {
+            e.preventDefault();
+            let pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            pastedText = pastedText.replace(/[^\d\s.,\-]/g, '');
+            document.execCommand('insertText', false, pastedText);
+        });
+    });
+    
+    ops.forEach(op => {
+        op.addEventListener('change', () => {
+            setTimeout(() => calcButton.click(), 100);
+        });
+    });
+    
+    setTimeout(() => {
+        calcButton.click();
+    }, 100);
+});
+</script>
+
+</body>
+</html>
